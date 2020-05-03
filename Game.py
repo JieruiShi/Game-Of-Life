@@ -1,6 +1,6 @@
 import pygame
-from GameOfLife import Main
-from miscellaneous import Buttons
+import Main
+import Buttons
 pygame.init()
 screenSize = 700
 screen = pygame.display.set_mode((screenSize,screenSize))
@@ -130,3 +130,4 @@ while run:
         if button2.leftClicked():
             setPage = True
             startPage = False
+            pygame.time.delay(100)
