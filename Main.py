@@ -68,7 +68,7 @@ class GOLMatrix:
         lowerBound = self.columnNumber - 1
         lowerFound = False
         while leftFound == False and leftBound != self.columnNumber:
-            if True in newMatrix.currentMatrix[:, leftBound]:
+            if True in self.currentMatrix[:, leftBound]:
                 leftFound = True
             else:
                 leftBound += 1
@@ -76,19 +76,19 @@ class GOLMatrix:
             pass
         else:
             while rightFound == False:
-                if True in newMatrix.currentMatrix[:, rightBound]:
+                if True in self.currentMatrix[:, rightBound]:
                     rightFound = True
                 else:
                     rightBound -= 1
 
             while upperFound == False:
-                if True in newMatrix.currentMatrix[upperBound,:]:
+                if True in self.currentMatrix[upperBound,:]:
                     upperFound = True
                 else:
                     upperBound += 1
 
             while lowerFound == False:
-                if True in newMatrix.currentMatrix[lowerBound,:]:
+                if True in self.currentMatrix[lowerBound,:]:
                     lowerFound = True
                 else:
                     lowerBound -= 1
@@ -103,3 +103,15 @@ class GOLMatrix:
                     except IndexError:
                         pass
             self.currentMatrix = nextMatrix
+
+    def reshape(self,rowNo,columnNo):
+        self.columnNumber = columnNo
+        self.rowNumber = rowNo
+        nextMatrix = np.zeros(shape = (rowNo,columnNo),dtype=bool)
+        for i in range(nextMatrix.shape[0]):
+            for j in range(nextMatrix.shape[1]):
+                try:
+                    nextMatrix[i][j] = self.currentMatrix[i][j]
+                except IndexError:
+                    pass
+        self.currentMatrix = nextMatrix

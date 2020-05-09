@@ -7,7 +7,7 @@ import Buttons
 pygame.init()
 screenSize = 750
 screen = pygame.display.set_mode((screenSize,screenSize))
-pygame.display.set_caption("Game of Life 1.0")
+pygame.display.set_caption("Game of Life 1.1")
 icon = pygame.image.load("icon.PNG")
 pygame.display.set_icon(icon)
 RED = (255,0,0)
@@ -32,6 +32,11 @@ def drawGrid(surface,origin,cellNumber, blockDimension, thickness = 1, colour = 
     for n in range(cellNumber[1] + 1):
         pygame.draw.rect(surface, colour, (origin[0], origin[1] + n * blockDimension[1], blockDimension[0] * cellNumber[0], thickness))
 
+def showWord(text,position,colour = WHITE, size = 20):
+    myFont = pygame.font.SysFont("Times New Roman", size)
+    myText = myFont.render(text,True,colour)
+    screen.blit(myText,position)
+
 #region runPage
 def runUpdateDraw():
     screen.fill(BLACK)
@@ -55,7 +60,7 @@ def setUpdate():
                 try:
                     newMatrix.currentMatrix[y][x] = not newMatrix.currentMatrix[y][x]
                     watchDog = (x, y)
-                    watchCounter = 9
+                    watchCounter = 12
                 except IndexError:
                     pass
     if watchCounter == 0:
@@ -72,20 +77,39 @@ def setDraw():
     screen.fill(BLACK)
     newMatrix.display(screen, origin, cellDimension, thickness=thick)
     drawGrid(screen, origin, cellNumber, blockDimension, thickness=thick)
+    showWord("Grid Size: {}".format(gridSize),(screenSize - 120,screenSize - 210),colour = AQUA, size = 22)
     for button in runButtons:
         button.show()
 
+def setSizeChange(gridSize):
+    global cellDimension
+    global cellNumber
+    global thick
+    global blockDimension
+    gridDimension = list_of_size[gridSize]
+    cellDimension = (gridDimension[0], gridDimension[0])
+    cellNumber = (gridDimension[1], gridDimension[1])
+    thick = gridDimension[2]
+    blockDimension = (cellDimension[0] + thick, cellDimension[1] + thick)
+    newMatrix.reshape(gridDimension[1], gridDimension[1])
+
 #region setPage button & parameters
 button1 = Buttons.Button(screen,screenSize - 70, screenSize - 50,100,40,GREY,BLUE,GREEN,TEXT = "Start")
-button5 = Buttons.Button(screen,screenSize - 100, screenSize - 100,40,40,GREY,BLUE,GREEN,TEXT = "◄")
-button6 = Buttons.Button(screen,screenSize - 40, screenSize - 100,40,40,GREY,BLUE,GREEN,TEXT = "►")
-runButtons = [button1,button5,button6]
+button5 = Buttons.Button(screen,screenSize - 100, screenSize - 150,40,40,GREY,BLUE,GREEN,TEXT = "◄")
+button6 = Buttons.Button(screen,screenSize - 40, screenSize - 150,40,40,GREY,BLUE,GREEN,TEXT = "►")
+button7 = Buttons.Button(screen,screenSize - 70, screenSize - 100,100,40,GREY,BLUE,GREEN,TEXT = "Centralize")
+runButtons = [button1,button5,button6,button7]
 watchDog = (-1,-1)
 watchCounter = 0
 #endregion
 
-#along with button5,button6, changes gridsize.
+#along with button5,button6, parameters that control gridsize.
 list_of_size = [(4,120,1),(7,75,1),(9,60,1),(11,50,1),(13,40,2),(18,30,2),(23,24,2),(27,20,3),(36,15,4),(55,10,5)]
+origin = (10,10)
+cellDimension = (23,23)
+cellNumber = (24,24)
+thick = 2
+blockDimension = (cellDimension[0] + thick, cellDimension[1] + thick)
 gridSize = 7
 
 #endregion
@@ -108,24 +132,19 @@ startButtons = [button2, button3, button4]
 #endregion
 #endregion
 
-newMatrix = Main.GOLMatrix(100,20)
+newMatrix = Main.GOLMatrix(100,100)
 
 
 #parameters below control which page we are currently on
 runPage = False
-setPage = True
-startPage = False
+setPage = False
+startPage = True
 
 
 #controls framerate per second
 fps = 100
 
 #the values below set the parameters for the size and position of grid and cells.
-origin = (10,10)
-cellDimension = (23,23)
-cellNumber = (24,24)
-thick = 2
-blockDimension = (cellDimension[0] + thick, cellDimension[1] + thick)
 
 
 run = True
@@ -143,20 +162,29 @@ while run:
     elif setPage:
         setUpdate()
         setDraw()
+        # start the simulation
         if button1.leftClicked():
             setPage = False
             runPage = True
             fps = 3
-        elif button5.leftClicked() and watchCounter <= 0:
-            gridSize += 1
+        #increase the gridSize
+        elif button6.leftClicked() and watchCounter <= 0:
             watchCounter = 10
+            gridSize += 1
             if gridSize == 10:
                 gridSize = 0
-            gridDimension = list_of_size[gridSize]
-            cellDimension = (gridDimension[0],gridDimension[0])
-            cellNumber = (gridDimension[1],gridDimension[1])
-            thick = gridDimension[2]
-            blockDimension = (cellDimension[0] + thick, cellDimension[1] + thick)
+            setSizeChange(gridSize)
+        #decrease the gridSize
+        elif button5.leftClicked() and watchCounter <= 0:
+            watchCounter = 10
+            gridSize -= 1
+            if gridSize == -1:
+                gridSize = 9
+            setSizeChange(gridSize)
+        #centralize
+        elif button7.leftClicked() and watchCounter <= 0:
+            newMatrix.centralize()
+            watchCounter = 20
         watchCounter -= 1
         pygame.display.update()
         
@@ -167,3 +195,5 @@ while run:
             setPage = True
             startPage = False
             pygame.time.delay(100)
+            setSizeChange(gridSize)
+
