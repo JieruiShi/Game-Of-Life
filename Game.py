@@ -132,9 +132,6 @@ startButtons = [button2, button3, button4]
 #endregion
 #endregion
 
-newMatrix = Main.GOLMatrix(100,100)
-
-
 #parameters below control which page we are currently on
 runPage = False
 setPage = False
@@ -195,5 +192,6 @@ while run:
             setPage = True
             startPage = False
             pygame.time.delay(100)
+            newMatrix = Main.GOLMatrix(1,1)
             setSizeChange(gridSize)
 
