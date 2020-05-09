@@ -1,13 +1,4 @@
 import pygame
-"""
-pygame.init()
-screen = pygame.display.set_mode((500,500))
-RED = (255,0,0)
-GREEN = (0,255,0)
-BLUE = (0,0,255)
-BLACK = (0,0,0)
-WHITE = (255,255,255)
-GREY = (127,127,127)"""
 
 
 class Button:
@@ -53,20 +44,3 @@ class Button:
     # returns true if leftClicked while mouse is within button
     def leftClicked(self):
         return pygame.mouse.get_pressed()[0] and self.mouseIn()
-#The main loop below is for testing, disable when using this module.
-
-"""
-button1 = Button(250,250,100,20,GREEN,GREY,BLUE,TEXT = "TEST")
-
-run = True
-while run:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            run = False
-    if button1.leftClicked():
-        run = False
-    screen.fill(BLACK)
-    pygame.time.delay(40)
-    button1.show()
-    pygame.display.update()
-"""

@@ -1,8 +1,11 @@
 import pygame
 import Main
 import Buttons
+
+
+#region initialize screen,window,colour
 pygame.init()
-screenSize = 700
+screenSize = 750
 screen = pygame.display.set_mode((screenSize,screenSize))
 pygame.display.set_caption("Game of Life 1.0")
 icon = pygame.image.load("icon.PNG")
@@ -18,6 +21,7 @@ AQUA = (0,255,255)
 ORANGE = (255,165,0)
 NAVY = (0,0,128)
 PINK = (255,20,147)
+#endregion
 
 clock = pygame.time.Clock()
 
@@ -28,27 +32,34 @@ def drawGrid(surface,origin,cellNumber, blockDimension, thickness = 1, colour = 
     for n in range(cellNumber[1] + 1):
         pygame.draw.rect(surface, colour, (origin[0], origin[1] + n * blockDimension[1], blockDimension[0] * cellNumber[0], thickness))
 
+#region runPage
 def runUpdateDraw():
     screen.fill(BLACK)
     newMatrix.display(screen,origin,cellDimension, thickness = thick)
     newMatrix.stepChange()
 
+#runPage parameters
+Count = 0
+#endregion
+
+#region setPage
 def setUpdate():
     global watchDog
     global watchCounter
     if pygame.mouse.get_pressed()[0]:
         mousePosition = pygame.mouse.get_pos()
-        x, y = (mousePosition[0] - origin[0]) // blockDimension[0], (mousePosition[1] - origin[1]) // blockDimension[1]
-        if x >= 0 and y >= 0 and (x, y) != watchDog:
-            try:
-                newMatrix.currentMatrix[y][x] = not newMatrix.currentMatrix[y][x]
-                watchDog = (x, y)
-                watchCounter = 9
-            except IndexError:
-                pass
-        watchCounter -= 1
-        if watchCounter == 0:
-            watchDog = (-1, -1)
+        #to prevent clicking on menu triggers the cell update
+        if pygame.mouse.get_pos()[0]< (origin[0] + blockDimension[0] * cellNumber[0]) and pygame.mouse.get_pos()[1]< (origin[1] + blockDimension[1] * cellNumber[1]):
+            x, y = (mousePosition[0] - origin[0]) // blockDimension[0], (mousePosition[1] - origin[1]) // blockDimension[1]
+            if x >= 0 and y >= 0 and (x, y) != watchDog:
+                try:
+                    newMatrix.currentMatrix[y][x] = not newMatrix.currentMatrix[y][x]
+                    watchDog = (x, y)
+                    watchCounter = 9
+                except IndexError:
+                    pass
+    if watchCounter == 0:
+        watchDog = (-1, -1)
         # watchCounter and watchDog are used for debounce (prevent one click triggering the function multiple times)
 
 def setDraw():
@@ -61,13 +72,32 @@ def setDraw():
     screen.fill(BLACK)
     newMatrix.display(screen, origin, cellDimension, thickness=thick)
     drawGrid(screen, origin, cellNumber, blockDimension, thickness=thick)
+    for button in runButtons:
+        button.show()
 
+#region setPage button & parameters
+button1 = Buttons.Button(screen,screenSize - 70, screenSize - 50,100,40,GREY,BLUE,GREEN,TEXT = "Start")
+button5 = Buttons.Button(screen,screenSize - 100, screenSize - 100,40,40,GREY,BLUE,GREEN,TEXT = "◄")
+button6 = Buttons.Button(screen,screenSize - 40, screenSize - 100,40,40,GREY,BLUE,GREEN,TEXT = "►")
+runButtons = [button1,button5,button6]
+watchDog = (-1,-1)
+watchCounter = 0
+#endregion
+
+#along with button5,button6, changes gridsize.
+list_of_size = [(4,120,1),(7,75,1),(9,60,1),(11,50,1),(13,40,2),(18,30,2),(23,24,2),(27,20,3),(36,15,4),(55,10,5)]
+gridSize = 7
+
+#endregion
+
+#region startPage
 def startUpdateDraw():
     screen.fill((0, 0, 0))
     for button in startButtons:
         button.show()
     pygame.display.update()
 
+#region startPage button & parameters
 button2 = Buttons.Button(screen, screenSize / 2, screenSize / 2 - 50, 150, 40, WHITE, GREY, BLUE, textcolour=BLACK,
                  textcolour2=BLACK, TEXT="Start")
 button3 = Buttons.Button(screen, screenSize / 2, screenSize / 2, 150, 40, WHITE, GREY, BLUE, textcolour=BLACK,
@@ -75,33 +105,28 @@ button3 = Buttons.Button(screen, screenSize / 2, screenSize / 2, 150, 40, WHITE,
 button4 = Buttons.Button(screen, screenSize / 2, screenSize / 2 + 50, 150, 40, WHITE, GREY, BLUE, textcolour=BLACK,
                  textcolour2=BLACK, TEXT="Quit")
 startButtons = [button2, button3, button4]
+#endregion
+#endregion
 
-newMatrix = Main.GOLMatrix(20,20)
-#diehard = [(50,50),(51,50),(51,51),(56,49),(57,51),(55,51),(56,51)]
-#newMatrix.initialCondition(diehard)
-runButton = Buttons.Button(screen,screenSize - 50, screenSize - 50,100,40,GREY,BLUE,GREEN,TEXT = "Start")
+newMatrix = Main.GOLMatrix(100,20)
+
 
 #parameters below control which page we are currently on
 runPage = False
-setPage = False
-startPage = True
+setPage = True
+startPage = False
 
-#setPage parameters
-watchDog = (-1,-1)
-watchCounter = 0
-
-#runPage parameters
-Count = 0
 
 #controls framerate per second
 fps = 100
 
 #the values below set the parameters for the size and position of grid and cells.
-origin = (30,30)
-cellDimension = (25,25)
-cellNumber = (20,20)
+origin = (10,10)
+cellDimension = (23,23)
+cellNumber = (24,24)
 thick = 2
 blockDimension = (cellDimension[0] + thick, cellDimension[1] + thick)
+
 
 run = True
 while run:
@@ -118,12 +143,23 @@ while run:
     elif setPage:
         setUpdate()
         setDraw()
-        runButton.show()
-        if runButton.leftClicked():
+        if button1.leftClicked():
             setPage = False
             runPage = True
             fps = 3
+        elif button5.leftClicked() and watchCounter <= 0:
+            gridSize += 1
+            watchCounter = 10
+            if gridSize == 10:
+                gridSize = 0
+            gridDimension = list_of_size[gridSize]
+            cellDimension = (gridDimension[0],gridDimension[0])
+            cellNumber = (gridDimension[1],gridDimension[1])
+            thick = gridDimension[2]
+            blockDimension = (cellDimension[0] + thick, cellDimension[1] + thick)
+        watchCounter -= 1
         pygame.display.update()
+        
 
     elif startPage:
         startUpdateDraw()

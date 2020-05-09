@@ -57,26 +57,49 @@ class GOLMatrix:
                 if self.currentMatrix[i][j] == True:
                     pygame.draw.rect(screen, colour, (origin[0] + thickness + (cellDimension[0] + thickness)* j, origin[1] + thickness + (cellDimension[1] + thickness) * i, cellDimension[0], cellDimension[1]))
 
-"""
-def stepChange(currentMatrix, staynumber, bornnumber):
-    nextMatrix = np.zeros(shape = self.currentMatrix.shape, dtype = bool)
-    for i in range(currentMatrix.shape[0]):
-        for j in range(currentMatrix.shape[1]):
-            if getAdjacent2(i,j) in staynumber:
-                nextMatrix[i][j] = currentMatrix[i][j]
-            if getAdjacent2(i,j) in bornnumber:
-                nextMatrix[i][j] = True
+    def centralize(self):
+        """shift all the cells to centre. Do this using the furthest point as reference to the edges. Choose right bottom if cannot be exact centre."""
+        leftBound = 0
+        leftFound = False
+        rightBound = self.columnNumber - 1
+        rightFound = False
+        upperBound = 0
+        upperFound = False
+        lowerBound = self.columnNumber - 1
+        lowerFound = False
+        while leftFound == False and leftBound != self.columnNumber:
+            if True in newMatrix.currentMatrix[:, leftBound]:
+                leftFound = True
             else:
-                nextMatrix[i][j] = False
-    return nextMatrix
+                leftBound += 1
+        if leftBound == self.columnNumber:
+            pass
+        else:
+            while rightFound == False:
+                if True in newMatrix.currentMatrix[:, rightBound]:
+                    rightFound = True
+                else:
+                    rightBound -= 1
 
+            while upperFound == False:
+                if True in newMatrix.currentMatrix[upperBound,:]:
+                    upperFound = True
+                else:
+                    upperBound += 1
 
-Matrix1 = GOLMatrix(5,6)
-print (Matrix1.currentMatrix)
-Matrix1.initialCondition(((1,1),(1,2),(2,2),(3,3)))
-print (Matrix1.currentMatrix)
-Matrix1.stepChange()
-print (Matrix1.currentMatrix)
-Matrix1.stepChange()
-print (Matrix1.currentMatrix)
-"""
+            while lowerFound == False:
+                if True in newMatrix.currentMatrix[lowerBound,:]:
+                    lowerFound = True
+                else:
+                    lowerBound -= 1
+            #calculate difference between centre of True blocks and centre of matrix. Floor divide by 2 together to avoid accumulation of errors.
+            leftShift = (leftBound + rightBound + 1 - self.columnNumber)//2
+            upShift = (upperBound + lowerBound + 1 - self.rowNumber)//2
+            nextMatrix = np.zeros(shape = (self.rowNumber,self.columnNumber), dtype = bool)
+            for i in range(nextMatrix.shape[0]):
+                for j in range(nextMatrix.shape[1]):
+                    try:
+                        nextMatrix[i][j] = self.currentMatrix[i + upShift][j + leftShift]
+                    except IndexError:
+                        pass
+            self.currentMatrix = nextMatrix
